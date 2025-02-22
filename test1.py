@@ -72,6 +72,12 @@ def calculate_body_measurements(frame, scaling_factor):
     waist_cm = convert_pixels_to_cm(waist_width_pixels, scaling_factor)
     hip_cm = convert_pixels_to_cm(hip_width_pixels, scaling_factor)
 
+    # Manually adjust measurements for better accuracy
+    shoulder_cm += 2  # Add 2 cm to shoulder width
+    chest_cm += 5     # Add 5 cm to chest width
+    waist_cm += 5     # Add 5 cm to waist width
+    hip_cm += 5       # Add 5 cm to hip width
+
     return {
         'shoulder_width': round(shoulder_cm, 2),
         'chest_width': round(chest_cm, 2),
@@ -171,7 +177,7 @@ while cap.isOpened():
             body_type = classify_body_type(measurements)
             body_size = classify_body_size(measurements)  # Get body size
 
-            # Display measurements, body type, and body size on screen
+            # Display measurements, body type, body size, and waist size on screen
             font = cv2.FONT_HERSHEY_SIMPLEX
             font_scale = 0.8
             font_color = (0, 0, 255)
@@ -183,6 +189,7 @@ while cap.isOpened():
             cv2.putText(frame, f"Hip Width: {measurements['hip_width']} cm", (10, 150), font, font_scale, font_color, font_thickness)
             cv2.putText(frame, f"Body Type: {body_type}", (10, 190), font, font_scale, font_color, font_thickness)
             cv2.putText(frame, f"Body Size: {body_size}", (10, 230), font, font_scale, font_color, font_thickness)
+            cv2.putText(frame, f"Waist Size: {measurements['waist_width']} cm", (10, 270), font, font_scale, font_color, font_thickness)
 
             if is_optimal_pose(measurements):
                 stable_frames += 1
@@ -191,6 +198,7 @@ while cap.isOpened():
                     print("Final Measurements:", optimal_measurements)
                     print("Body Type:", body_type)
                     print("Body Size:", body_size)  # Print body size
+                    print("Waist Size:", measurements['waist_width'], "cm")  # Print waist size
                     break
             else:
                 stable_frames = 0

@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify
-import cv2
 from flask_cors import CORS
+import cv2
 import mediapipe as mp
 import numpy as np
 import base64
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # Enable CORS for all routes
+
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5, model_complexity=2)
@@ -120,6 +121,18 @@ def classify_body_size(measurements):
     else:
         return "Extra Extra Large (XXL)"
 
+def is_optimal_pose(measurements):
+    """Check if the pose is optimal based on predefined criteria."""
+    shoulder_width = measurements['shoulder_width']
+    waist_width = measurements['waist_width']
+    hip_width = measurements['hip_width']
+
+    # Example criteria for optimal pose
+    return (
+        shoulder_width >= 40 and shoulder_width <= 50 and
+        waist_width / hip_width <= 0.85
+    )
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     """API endpoint to analyze body measurements from a base64-encoded image."""
@@ -154,11 +167,15 @@ def analyze():
         body_type = classify_body_type(measurements)
         body_size = classify_body_size(measurements)
 
+        # Check for optimal pose
+        is_optimal = is_optimal_pose(measurements)
+
         # Return results as JSON
         return jsonify({
             "measurements": measurements,
             "body_type": body_type,
-            "body_size": body_size
+            "body_size": body_size,
+            "is_optimal_pose": is_optimal
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500

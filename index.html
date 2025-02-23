@@ -465,6 +465,42 @@ window.onload = function () {
         background-color: #28a745;
         color: white;
     }
+    .image-button {
+    width: 100%; /* Ensure it takes up the grid space */
+    height: auto; /* Adjust height automatically */
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 10px;
+    transition: transform 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+    background-color: white;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+    .image-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 0px 15px rgba(0, 123, 255, 0.5);
+}
+
+.image-button img {
+    width: 100%;
+    height: auto;
+    max-height: 200px; /* Adjust based on your design */
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.image-button p {
+    margin-top: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.image-button.selected {
+    border: 2px solid #007bff;
+    transform: scale(1.1);
+    box-shadow: 0px 0px 15px rgba(0, 123, 255, 0.5);
+}
 </style>
 
 
@@ -551,21 +587,27 @@ window.onload = function () {
     }
 
     .container {
-      text-align: center;
-      max-width: 2080px;
-      width: 100%;
-      padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns */
+    gap: 20px; /* Space between items */
+    justify-content: center;
+    align-items: center;
+    max-width: 1200px; /* Adjust based on your design */
+    margin: 0 auto; /* Center the grid */
+    padding: 20px; /* Add padding for better spacing */
     }
 
     h1 {
       font-size: 2rem;
       margin-bottom: 10px;
+      color: #333;
     }
 
     p {
       font-size: 1rem;
       color: #555;
       margin-bottom: 20px;
+      color: #666;
     }
 
     .brand-grid {
@@ -573,12 +615,14 @@ window.onload = function () {
       grid-template-columns: repeat(4, 1fr);
       gap: 20px;
       margin-top: 20px;
+      max-width: 1200px;
+    margin: 0 auto;
     }
 
     .flip-card {
       background-color: transparent;
-      width: 150px;
-      height: 150px;
+      width: 250px;
+      height: 350px;
       perspective: 1000px;
       cursor: pointer;
     }
@@ -622,6 +666,7 @@ window.onload = function () {
       height: 80px;
       border-radius: 50%;
       margin-bottom: 10px;
+      object-fit: contain;
     }
 
     .flip-card p {
@@ -648,32 +693,78 @@ window.onload = function () {
     .size-options button:hover {
       background-color: #0056b3;
     }
+      .size-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.size-options button, .fit-options button, .waist-options button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+.size-options button:hover, .fit-options button:hover, .waist-options button:hover {
+    background-color: #0056b3;
+}
+
+.fit-options, .waist-options {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: flex;
+}
+
   </style>
 </head>
   <div class="container">
-    <center><h1>Find Your Perfect Fit</h1>
-    <p>Here's a selection of the range of garment types Fit Finder covers.</p>
-    <p>Click any item to test how easy Fit Finder is to use.</p></center>
-
-    <!-- Brand Grid -->
-    <div class="brand-grid">
-      <!-- Row 1 -->
-      <div class="flip-card" onclick="flipCard(this)">
-        <div class="flip-card-inner">
-          <div class="flip-card-front">
-            <img src="zara.png" alt="Brand 1">
-            <p>Brand 1</p>
-          </div>
-          <div class="flip-card-back">
-            <h3>Brand 1</h3>
-            <div class="size-options">
-              <button onclick="selectSize('1-shirt')">1 - Shirt</button>
-              <button onclick="selectSize('2-t-shirt')">2 - T-Shirt</button>
-              <button onclick="selectSize('3-pants')">3 - Pants</button>
+        <center>
+            <h1>Find Your Perfect Fit</h1>
+            <p>Here's a selection of the range of garment types Fit Finder covers.</p>
+            <p>Click any item to test how easy Fit Finder is to use.</p>
+        </center>
+        <br><br>
+        <!-- Brand Grid -->
+        <div class="brand-grid">
+            <!-- Brand Cards -->
+            <div class="flip-card" onclick="flipCard(this)">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <img src="zara.png" alt="Brand 1">
+                        <p>Brand 1</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <h3>Brand 1</h3>
+                        <div class="size-options">
+                            <button onclick="showFitOptions('shirt', this)">Shirt</button>
+                            <button onclick="showFitOptions('tshirt', this)">T-Shirt</button>
+                            <button onclick="showFitOptions('pants', this)">Pants</button>
+                        </div>
+                        <div class="fit-options hidden">
+                            <button onclick="selectFit('regular')">Regular Fit</button>
+                            <button onclick="selectFit('oversized')">Oversized Fit</button>
+                        </div>
+                        <div class="waist-options hidden">
+                            <button onclick="selectWaist('high')">High Waist</button>
+                            <button onclick="selectWaist('low')">Low Waist</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
 
       <div class="flip-card" onclick="flipCard(this)">
         <div class="flip-card-inner">
@@ -800,14 +891,39 @@ window.onload = function () {
   <script>
     // Function to flip the card
     function flipCard(card) {
-      card.classList.toggle('flipped');
-    }
+    card.classList.toggle('flipped');
+    card.querySelector('.flip-card-inner').style.transform = card.classList.contains('flipped') ? 'rotateY(180deg)' : 'rotateY(0deg)';
+}
 
-    // Function to handle size selection
-    function selectSize(size) {
-      alert(`You selected: ${size}`);
-      // You can replace this with your logic to handle size selection
+// Function to show fit or waist options
+function showFitOptions(type, button) {
+    const flipCardBack = button.closest('.flip-card-back');
+    const fitOptions = flipCardBack.querySelector('.fit-options');
+    const waistOptions = flipCardBack.querySelector('.waist-options');
+
+    // Hide all options first
+    fitOptions.classList.add('hidden');
+    waistOptions.classList.add('hidden');
+
+    // Show the appropriate options based on the type
+    if (type === 'tshirt') {
+        fitOptions.classList.remove('hidden');
+    } else if (type === 'pants') {
+        waistOptions.classList.remove('hidden');
     }
+}
+
+// Function to handle fit selection
+function selectFit(fit) {
+    alert(`You selected: ${fit} fit`);
+    // Add your logic here
+}
+
+// Function to handle waist selection
+function selectWaist(waist) {
+    alert(`You selected: ${waist} waist`);
+    // Add your logic here
+}
   </script>
 <!-- CSS Fixes -->
 <style>

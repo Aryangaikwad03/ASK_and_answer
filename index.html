@@ -42,7 +42,7 @@
       </a>
 
       <nav id="navmenu" class="navmenu">
-       
+
 
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -171,84 +171,173 @@
 
 
         <!-- Camera-Based Section (Initially Hidden) -->
-        <div id="cameraBox" style="display: none; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); margin-top: 20px;">
-            <h3>Use Camera to Detect Body Type</h3>
-            <p>Click the button below to use your camera for automatic body type detection.</p>
-            <button onclick="startCamera()" style="background: blue; color: white; padding: 10px; width: 100%; border: none; cursor: pointer;">Start Camera</button>
-            <div id="cameraFeed" style="display: none; margin-top: 10px;">
-                <video id="videoElement" width="100%" autoplay></video>
-                <button onclick="captureImage()" style="background: red; color: white; padding: 10px; width: 100%; border: none; margin-top: 10px; cursor: pointer;">Capture</button>
-            </div>
-        </div>
-        <div>
-          <!-- Submit Button -->
-          <button onclick="toggleBodyTypeSection()" style="background: green; color: white; padding: 10px; width: 100%; border: none; cursor: pointer; margin-top: 20px;">
-            You Guessed It Wrong
-          </button>
-      </div>
+        <!-- Camera-Based Section -->
+<div id="cameraBox" style="display: none; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); margin-top: 20px;">
+    <h3>Use Camera to Detect Body Type</h3>
+    <p>Click the button below to use your camera for automatic body type detection.</p>
+    <button onclick="startCamera()" style="background: blue; color: white; padding: 10px; width: 100%; border: none; cursor: pointer;">Start Camera</button>
+    <div id="cameraFeed" style="display: none; margin-top: 10px;">
+        <video id="videoElement" width="100%" autoplay></video>
+        <button onclick="captureImage()" style="background: red; color: white; padding: 10px; width: 100%; border: none; margin-top: 10px; cursor: pointer;">Capture</button>
+    </div>
+</div>
+
+<!-- "You Guessed It Wrong" Button -->
+<div>
+    <button onclick="toggleBodyTypeSection()" style="background: green; color: white; padding: 10px; width: 100%; border: none; cursor: pointer; margin-top: 20px;">
+        You Guessed It Wrong
+    </button>
+</div>
+
+<!-- Results Section -->
+<div id="results" style="margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 10px;"></div>
     </div>
 </section>
 
 <!-- JavaScript -->
 <script>
     function toggleMethod() {
-        let manualInputBox = document.getElementById('manualInputBox');
-        let cameraBox = document.getElementById('cameraBox');
-        let toggle = document.getElementById('toggleMethod');
-        let slider = document.getElementById('toggleSlider');
-        let circle = document.getElementById('toggleCircle');
+    let manualInputBox = document.getElementById('manualInputBox');
+    let cameraBox = document.getElementById('cameraBox');
+    let toggle = document.getElementById('toggleMethod');
+    let slider = document.getElementById('toggleSlider');
+    let circle = document.getElementById('toggleCircle');
 
-        if (toggle.checked) {
-            manualInputBox.style.display = 'none';
-            cameraBox.style.display = 'block';
-            slider.style.backgroundColor = 'green';
-            circle.style.transform = 'translateX(30px)';
-        } else {
-            manualInputBox.style.display = 'block';
-            cameraBox.style.display = 'none';
-            slider.style.backgroundColor = '#ccc';
-            circle.style.transform = 'translateX(0)';
+    if (toggle.checked) {
+        manualInputBox.style.display = 'none';
+        cameraBox.style.display = 'block';
+        slider.style.backgroundColor = 'green';
+        circle.style.transform = 'translateX(30px)';
+    } else {
+        manualInputBox.style.display = 'block';
+        cameraBox.style.display = 'none';
+        slider.style.backgroundColor = '#ccc';
+        circle.style.transform = 'translateX(0)';
+    }
+}
+
+function toggleHeightUnit() {
+    let cmInputContainer = document.getElementById("cmInputContainer");
+    let feetInchesContainer = document.getElementById("feetInchesContainer");
+    let heightUnit = document.getElementById("heightUnit");
+
+    if (heightUnit.value === "ftin") {
+        cmInputContainer.style.display = "none";
+        feetInchesContainer.style.display = "block";
+    } else {
+        cmInputContainer.style.display = "block";
+        feetInchesContainer.style.display = "none";
+    }
+}
+
+let videoElement;
+let stream;
+
+function startCamera() {
+    videoElement = document.getElementById("videoElement");
+    let cameraFeed = document.getElementById("cameraFeed");
+
+    cameraFeed.style.display = "block";
+
+    // Access the camera
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then((cameraStream) => {
+            videoElement.srcObject = cameraStream;
+            stream = cameraStream; // Store the stream for later use
+        })
+        .catch((err) => {
+            alert("Camera access denied! Please enable camera permissions.");
+            console.error(err);
+        });
+}
+
+function captureImage() {
+    captureAndAnalyze();
+}
+
+async function captureAndAnalyze() {
+    const video = document.getElementById("videoElement");
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    // Set canvas dimensions to match the video feed
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Draw the current frame from the video onto the canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert the canvas image to base64
+    const imageData = canvas.toDataURL("image/jpeg").split(",")[1]; // Extract base64 data
+
+    // Stop the camera stream
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+
+    // Send the image to the API
+    try {
+        const response = await fetch("http://localhost:5000/analyze", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ image: imageData }),
+        });
+
+        if (!response.ok) {
+            throw new Error("API request failed");
         }
+
+        const result = await response.json();
+
+        // Display the results to the user
+        displayResults(result);
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to analyze image. Please try again.");
     }
+}
 
-    function toggleHeightUnit() {
-        let cmInputContainer = document.getElementById("cmInputContainer");
-        let feetInchesContainer = document.getElementById("feetInchesContainer");
-        let heightUnit = document.getElementById("heightUnit");
+function displayResults(result) {
+    // Display the results in the HTML
+    const resultsDiv = document.getElementById("results");
+    resultsDiv.innerHTML = `
+        <h3>Analysis Results</h3>
+        <p><strong>Shoulder Width:</strong> ${result.measurements.shoulder_width} cm</p>
+        <p><strong>Chest Width:</strong> ${result.measurements.chest_width} cm</p>
+        <p><strong>Waist Width:</strong> ${result.measurements.waist_width} cm</p>
+        <p><strong>Hip Width:</strong> ${result.measurements.hip_width} cm</p>
+        <p><strong>Body Type:</strong> ${result.body_type}</p>
+        <p><strong>Body Size:</strong> ${result.body_size}</p>
+    `;
+}
 
-        if (heightUnit.value === "ftin") {
-            cmInputContainer.style.display = "none";
-            feetInchesContainer.style.display = "block";
-        } else {
-            cmInputContainer.style.display = "block";
-            feetInchesContainer.style.display = "none";
-        }
+function toggleBodyTypeSection() {
+    let section = document.getElementById("bodyTypeSection");
+    if (section.style.display === "none") {
+        section.style.display = "block";
+    } else {
+        section.style.display = "none";
     }
+}
 
-    function startCamera() {
-        let videoElement = document.getElementById("videoElement");
-        let cameraFeed = document.getElementById("cameraFeed");
+function selectImage(element, bodyType) {
+    // Remove 'selected' class from all buttons
+    let buttons = document.querySelectorAll(".image-button");
+    buttons.forEach(btn => btn.classList.remove("selected"));
 
-        cameraFeed.style.display = "block";
+    // Add 'selected' class to the clicked button
+    element.classList.add("selected");
 
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then((stream) => {
-                videoElement.srcObject = stream;
-            })
-            .catch((err) => {
-                alert("Camera access denied! Please enable camera permissions.");
-                console.error(err);
-            });
-    }
+    // Update input field
+    document.getElementById("selected-value").value = bodyType;
+}
 
-    function captureImage() {
-        alert("Image Captured! (Processing to detect body type...)");
-    }
-
-    window.onload = function () {
-        document.getElementById("cmInputContainer").style.display = "block";
-        document.getElementById("feetInchesContainer").style.display = "none";
-    };
+window.onload = function () {
+    document.getElementById("cmInputContainer").style.display = "block";
+    document.getElementById("feetInchesContainer").style.display = "none";
+};
 </script>
 
 <!-- CSS for Icon Styling -->
@@ -488,3 +577,4 @@
 </body>
 
 </html>
+

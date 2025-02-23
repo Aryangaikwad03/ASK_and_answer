@@ -119,54 +119,161 @@
         </div>
 
         <!-- Manual Input Form -->
-        <div id="manualInputBox" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1);">
-            <label for="heightUnit" style="font-weight: bold; display: block;">Select Unit for Height</label>
-            <select id="heightUnit" onchange="toggleHeightUnit()" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-                <option value="cm" selected>Centimeters (cm)</option>
-                <option value="ftin">Feet + Inches</option>
-            </select>
+ <div id="manualInputBox" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1);">
+    <label for="heightUnit" style="font-weight: bold; display: block;">Select Unit for Height</label>
+    <select id="heightUnit" onchange="toggleHeightUnit()" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+        <option value="cm" selected>Centimeters (cm)</option>
+        <option value="ftin">Feet + Inches</option>
+    </select>
 
-            <!-- Height Input (CM) -->
-            <div id="cmInputContainer">
-                <label for="heightCm" style="font-weight: bold;">Height (cm)</label>
-                <input type="number" id="heightCm" placeholder="Enter height in cm" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-            </div>
+    <!-- Height Input (CM) -->
+    <div id="cmInputContainer">
+        <label for="heightCm" style="font-weight: bold;">Height (cm)</label>
+        <input type="number" id="heightCm" placeholder="Enter height in cm" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+    </div>
 
-            <!-- Height Input (Feet + Inches) -->
-            <div id="feetInchesContainer" style="display: none;">
-                <label style="font-weight: bold;">Height (Feet + Inches)</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" id="heightFeet" placeholder="Feet" style="width: 50%; padding: 8px;">
-                    <input type="number" id="heightInches" placeholder="Inches" style="width: 50%; padding: 8px;">
-                </div>
-            </div>
+    <!-- Height Input (Feet + Inches) -->
+    <div id="feetInchesContainer" style="display: none;">
+        <label style="font-weight: bold;">Height (Feet + Inches)</label>
+        <div style="display: flex; gap: 10px;">
+            <input type="number" id="heightFeet" placeholder="Feet" style="width: 50%; padding: 8px;">
+            <input type="number" id="heightInches" placeholder="Inches" style="width: 50%; padding: 8px;">
+        </div>
+    </div>
 
-            <!-- Weight Input -->
-            <label for="weight" style="font-weight: bold; margin-top: 10px; display: block;">Weight</label>
-            <div style="display: flex; gap: 10px;">
-                <input type="number" id="weight" placeholder="Enter weight" style="width: 70%; padding: 8px;">
-                <select id="weightUnit" style="width: 30%; padding: 8px;">
-                    <option value="kg">kg</option>
-                    <option value="lbs">lbs</option>
-                </select>
-            </div>
+    <!-- Weight Input -->
+    <label for="weight" style="font-weight: bold; margin-top: 10px; display: block;">Weight</label>
+    <div style="display: flex; gap: 10px;">
+        <input type="number" id="weight" placeholder="Enter weight" style="width: 70%; padding: 8px;">
+        <select id="weightUnit" style="width: 30%; padding: 8px;">
+            <option value="kg">kg</option>
+            <option value="lbs">lbs</option>
+        </select>
+    </div>
 
-            <!-- Gender Selection -->
-<label style="font-weight: bold; margin-top: 10px; display: block;">Select Gender</label>
-<div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
-    <input type="radio" id="male" name="gender" value="male" checked>
-    <label for="male">Male</label>
+    <!-- Gender Selection -->
+    <label style="font-weight: bold; margin-top: 10px; display: block;">Select Gender</label>
+    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+        <input type="radio" id="male" name="gender" value="male" checked>
+        <label for="male">Male</label>
 
-    <input type="radio" id="female" name="gender" value="female">
-    <label for="female">Female</label>
+        <input type="radio" id="female" name="gender" value="female">
+        <label for="female">Female</label>
+    </div>
+
+    <!-- Submit Button -->
+    <button id="submitButton" style="background: green; color: white; width: 100%; padding: 10px; border: none; margin-top: 10px; cursor: pointer;">CONTINUE ></button>
 </div>
 
+<h2>Predicted Measurements:</h2>
+<div id="result">
+    <p>Chest: <span id="chest"></span></p>
+    <p>Shoulder: <span id="shoulder"></span></p>
+    <p>Waist: <span id="waist"></span></p>
+    <p>Hips: <span id="hips"></span></p>
+    <p>Body Size: <span id="bs"></span></p>
+</div>
 
-            <!-- Submit Button -->
-            <button style="background: green; color: white; width: 100%; padding: 10px; border: none; margin-top: 10px; cursor: pointer;">CONTINUE ></button>
-        </div>
+<script>
+    // Function to toggle height input fields
+    function toggleHeightUnit() {
+        const heightUnit = document.getElementById('heightUnit').value;
+        if (heightUnit === 'cm') {
+            document.getElementById('cmInputContainer').style.display = 'block';
+            document.getElementById('feetInchesContainer').style.display = 'none';
+        } else {
+            document.getElementById('cmInputContainer').style.display = 'none';
+            document.getElementById('feetInchesContainer').style.display = 'block';
+        }
+    }
 
-      </div>
+    // Function to convert feet and inches to cm
+    function convertFeetInchesToCm(feet, inches) {
+        const totalInches = (feet * 12) + inches;
+        return totalInches * 2.54; // 1 inch = 2.54 cm
+    }
+
+    // Function to convert lbs to kg
+    function convertLbsToKg(lbs) {
+        return lbs * 0.453592; // 1 lb = 0.453592 kg
+    }
+
+    // Function to determine size category based on shoulder size
+    function getSizeCategory(shoulder) {
+        if (shoulder < 40) {
+            return "Small (S)";
+        } else if (shoulder >= 40 && shoulder < 45) {
+            return "Medium (M)";
+        } else if (shoulder >= 45 && shoulder < 50) {
+            return "Large (L)";
+        } else if (shoulder >= 50 && shoulder < 55) {
+            return "Extra Large (XL)";
+        } else {
+            return "Extra Extra Large (XXL)";
+        }
+    }
+
+    // Submit button event listener
+    document.getElementById('submitButton').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent form submission
+
+        // Get height
+        let height;
+        const heightUnit = document.getElementById('heightUnit').value;
+        if (heightUnit === 'cm') {
+            height = parseFloat(document.getElementById('heightCm').value);
+        } else {
+            const feet = parseFloat(document.getElementById('heightFeet').value);
+            const inches = parseFloat(document.getElementById('heightInches').value);
+            height = convertFeetInchesToCm(feet, inches);
+        }
+
+        // Get weight
+        let weight = parseFloat(document.getElementById('weight').value);
+        const weightUnit = document.getElementById('weightUnit').value;
+        if (weightUnit === 'lbs') {
+            weight = convertLbsToKg(weight);
+        }
+
+        // Get gender
+        const gender = document.querySelector('input[name="gender"]:checked').value;
+
+        // Send data to backend
+        fetch('http://127.0.0.1:5000/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ height, weight, gender }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Debugging: Log the response data
+            console.log('Response Data:', data);
+
+            // Display predictions
+            document.getElementById('chest').textContent = parseFloat(data.chest.toFixed(2));
+            document.getElementById('shoulder').textContent = parseFloat(data.shoulder.toFixed(2));
+            document.getElementById('waist').textContent = parseFloat(data.waist.toFixed(2));
+            document.getElementById('hips').textContent = parseFloat(data.hips.toFixed(2));
+
+            // Calculate size category
+            const shoulderSize = parseFloat(data.shoulder); // Use the shoulder value directly
+            const sizeCategory = getSizeCategory(shoulderSize);
+            console.log('Response Data:', sizeCategory);
+            // Display size category
+            document.getElementById('bs').textContent = sizeCategory;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+</script>
 
 
 
@@ -304,8 +411,7 @@ function displayResults(result) {
     const resultsDiv = document.getElementById("results");
     resultsDiv.innerHTML = `
         <h3>Analysis Results</h3>
-        <p><img src=
-        <strong>Shoulder Width:</strong> ${result.measurements.shoulder_width} cm</p>
+        <p><strong>Shoulder Width:</strong> ${result.measurements.shoulder_width} cm</p>
         <p><strong>Chest Width:</strong> ${result.measurements.chest_width} cm</p>
         <p><strong>Waist Width:</strong> ${result.measurements.waist_width} cm</p>
         <p><strong>Hip Width:</strong> ${result.measurements.hip_width} cm</p>
@@ -446,7 +552,7 @@ window.onload = function () {
 
     .container {
       text-align: center;
-      max-width: 2280px;
+      max-width: 2080px;
       width: 100%;
       padding: 20px;
     }

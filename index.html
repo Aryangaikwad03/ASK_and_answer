@@ -304,7 +304,8 @@ function displayResults(result) {
     const resultsDiv = document.getElementById("results");
     resultsDiv.innerHTML = `
         <h3>Analysis Results</h3>
-        <p><strong>Shoulder Width:</strong> ${result.measurements.shoulder_width} cm</p>
+        <p><img src=
+        <strong>Shoulder Width:</strong> ${result.measurements.shoulder_width} cm</p>
         <p><strong>Chest Width:</strong> ${result.measurements.chest_width} cm</p>
         <p><strong>Waist Width:</strong> ${result.measurements.waist_width} cm</p>
         <p><strong>Hip Width:</strong> ${result.measurements.hip_width} cm</p>
@@ -445,7 +446,7 @@ window.onload = function () {
 
     .container {
       text-align: center;
-      max-width: 2080px;
+      max-width: 2280px;
       width: 100%;
       padding: 20px;
     }
